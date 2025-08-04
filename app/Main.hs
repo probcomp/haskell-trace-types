@@ -7,11 +7,12 @@
 module Main where
 
 import TraceTypes
-import Control.Monad.Bayes.Sampler
-import Control.Monad.Bayes.Weighted
+import Control.Monad.Bayes.Sampler.Lazy (runSamplerTIO)
+import Control.Monad.Bayes.Weighted (runWeightedT)
 import Data.Row.Records
+import GHC.OverloadedLabels (fromLabel)
 
-run = sampleIO . runWeighted
+run = runSamplerTIO . runWeightedT
 
 main :: IO ()
 main = do (b, w) <- run . traceSampler $ sample #b (brn $ mkUnit 0.4)

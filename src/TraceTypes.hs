@@ -20,6 +20,10 @@ import           Data.Finite
 import           GHC.TypeLits
 import           Control.Monad
 import           Control.Monad.Bayes.Class     as Bayes
+import           Control.Monad.Bayes.Class     ( MonadDistribution
+                                                , MonadFactor
+                                                , MonadMeasure
+                                                )
 import Statistics.Distribution (logDensity, complCumulative)
 import Statistics.Distribution.Gamma
 import Statistics.Distribution.Beta
@@ -186,7 +190,7 @@ pBind f g =
 -- SAMPLE
 
 singleLabelConstrain
-  :: (KnownSymbol l, MonadInfer m)
+  :: (KnownSymbol l, MonadMeasure m)
   => Label l
   -> D m (Rec (l .== a))
   -> Constraint (l .== a)
@@ -203,7 +207,7 @@ singleLabelConstrain lbl traced c = case c .! lbl of
   Nothing -> udist (sampler traced) (density traced)
 
 
-sample :: (KnownSymbol l, MonadInfer m) => Label l -> D m a -> P m (l .== a) a
+sample :: (KnownSymbol l, MonadMeasure m) => Label l -> D m a -> P m (l .== a) a
 sample lbl d =
   let sampleTraced = dist
         (do
@@ -224,7 +228,7 @@ sample lbl d =
 -- WITH PROBABILITY
 
 withProbability
-  :: (KnownSymbol l, MonadInfer m)
+  :: (KnownSymbol l, MonadMeasure m)
   => Label l
   -> Unit
   -> P m t a
@@ -259,7 +263,7 @@ withProbability lbl logit f g =
 -- FOR EACH
 
 forEach
-  :: (KnownSymbol l, KnownNat n, MonadInfer m)
+  :: (KnownSymbol l, KnownNat n, MonadMeasure m)
   => Label l
   -> Vector n a
   -> (a -> P m t b)
@@ -288,7 +292,7 @@ forEach lbl xs body =
 -- FOR ... IN RANDOM RANGE ...
 
 forRandomRange
-  :: (KnownSymbol l, MonadInfer m)
+  :: (KnownSymbol l, MonadMeasure m)
   => Label l
   -> D m Int
   -> (Int -> P m t a)
@@ -338,7 +342,7 @@ forRandomRange lbl d body =
  -}
 
 while
-  :: (KnownSymbol l, MonadInfer m)
+  :: (KnownSymbol l, MonadMeasure m)
   => Label l
   -> a
   -> (a -> Unit)
@@ -392,15 +396,15 @@ while lbl init pi pi_max body =
 -- DISTRIBUTIONS --
 -------------------
 
-nrm :: MonadInfer m => Double -> Log Double -> D m Double
+nrm :: MonadMeasure m => Double -> Log Double -> D m Double
 nrm mu (Exp sigln) = dist (normal mu (exp sigln)) (normalPdf mu (exp sigln))
 
-brn :: MonadSample m => Unit -> D m Bool
+brn :: MonadDistribution m => Unit -> D m Bool
 brn logit =
   let p = fromUnit logit
   in  dist (bernoulli p) (\b -> Exp . log $ if b then p else (1.0 - p))
 
-gmma :: MonadSample m => Log Double -> Log Double -> D m (Log Double)
+gmma :: MonadDistribution m => Log Double -> Log Double -> D m (Log Double)
 gmma shape scale =
   let toDouble (Exp l) = exp l
       toLogDouble d = Exp (log d)
@@ -410,16 +414,16 @@ gmma shape scale =
                                 (toDouble shape) (toDouble scale))
               . toDouble)
 
-geom :: MonadSample m => Unit -> D m Int
+geom :: MonadDistribution m => Unit -> D m Int
 geom p' = 
   let p = fromUnit p'
   in dist (geometric p)
           (\n -> Exp (fromIntegral n * (log p) + (log (1.0 - p))))
 
-pois :: MonadSample m => Int -> D m Int
+pois :: MonadDistribution m => Int -> D m Int
 pois = undefined
 
-bta :: MonadSample m => Log Double -> Log Double -> D m Unit
+bta :: MonadDistribution m => Log Double -> Log Double -> D m Unit
 bta (Exp lna) (Exp lnb) = 
   let
     a = exp lna
@@ -429,19 +433,19 @@ bta (Exp lna) (Exp lnb) =
          (Exp . (logDensity $ Statistics.Distribution.Beta.betaDistr a b)
               . fromUnit)
 
-unif :: MonadSample m => D m Unit
+unif :: MonadDistribution m => D m Unit
 unif = dist (fmap mkUnit Bayes.random) (\x -> 1.0 :: Log Double)
 
-cat :: (KnownNat n, MonadSample m) => Vector n Unit -> D m (Finite n)
+cat :: (KnownNat n, MonadDistribution m) => Vector n Unit -> D m (Finite n)
 cat probs = undefined
 
-lognormal :: forall m. MonadInfer m => Log Double -> Log Double -> D m (Log Double)
+lognormal :: forall m. MonadMeasure m => Log Double -> Log Double -> D m (Log Double)
 lognormal (Exp logmu) sigma =
   dist (fmap Exp $ sampler $ nrm logmu sigma)
        (\(Exp logx) -> density (nrm logmu sigma :: D m Double) logx / (Exp logx))
 
 
-truncnrm :: MonadInfer m => Log Double -> Log Double -> D m (Log Double)
+truncnrm :: MonadMeasure m => Log Double -> Log Double -> D m (Log Double)
 truncnrm (Exp logmu) (Exp logsigma) =
   let mu = exp logmu
       sigma = exp logsigma
@@ -466,7 +470,7 @@ truncnrm (Exp logmu) (Exp logsigma) =
 -- IMPORTANCE SAMPLING
 
 importance
-  :: (Disjoint t s, MonadInfer m)
+  :: (Disjoint t s, MonadMeasure m)
   => P m (t .+ s) a
   -> Rec t
   -> P m s b
@@ -481,7 +485,7 @@ importance p t q =
 -- SMC
 
 unroll 
-  :: (MonadInfer m, Disjoint t s) 
+  :: (MonadMeasure m, Disjoint t s) 
   => P m i a 
   -> (a -> P m (t .+ s) a)
   -> [Rec t]
@@ -497,7 +501,7 @@ unroll init next steps = do
   return (tInit, reverse l)
 
 particleFilter
-  :: (MonadInfer m, Disjoint t s, 
+  :: (MonadMeasure m, Disjoint t s, 
       Disjoint Empty i, (Empty .+ i) ≈ i)
   => P m i a
   -> P m i b
@@ -521,7 +525,7 @@ type K m t (s :: Row *) = U m (Rec t) -> Rec t -> m (Rec t)
 
 mh
   :: forall s t m a
-   . (Disjoint t s, MonadInfer m)
+   . (Disjoint t s, MonadMeasure m)
   => (Rec (t .+ s) -> P m t a)
   -> K m (t .+ s) t
 mh q p old =
@@ -543,7 +547,7 @@ seqK k1 k2 p old = do
   t' <- k1 p old
   k2 p t'
 
-mixK :: MonadSample m => Double -> K m t s -> K m t r -> K m t (s .\/ r)
+mixK :: MonadDistribution m => Double -> K m t s -> K m t r -> K m t (s .\/ r)
 mixK p k1 k2 model old = do
   r <- Bayes.random
   if r < p then k1 model old else k2 model old
