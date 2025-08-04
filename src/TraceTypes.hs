@@ -1,7 +1,8 @@
-{-# LANGUAGE DataKinds, NamedFieldPuns, GADTs, KindSignatures, TypeFamilies, TypeOperators, TypeApplications, ScopedTypeVariables, MultiParamTypeClasses, OverloadedLabels, InstanceSigs, FlexibleContexts, AllowAmbiguousTypes, FlexibleInstances, RankNTypes, UndecidableInstances, ConstraintKinds, OverlappingInstances, TypeFamilyDependencies #-}
+{-# LANGUAGE DataKinds, NamedFieldPuns, GADTs, KindSignatures, TypeFamilies, TypeOperators, TypeApplications, ScopedTypeVariables, MultiParamTypeClasses, OverloadedLabels, InstanceSigs, FlexibleContexts, AllowAmbiguousTypes, FlexibleInstances, RankNTypes, UndecidableInstances, ConstraintKinds, TypeFamilyDependencies #-}
 
 module TraceTypes where
 
+import           Data.Kind              (Type)
 import           Data.Row.Records        hiding ( Disjoint
                                                 , sequence
                                                 , map
@@ -521,7 +522,7 @@ particleFilter init qInit next steps = do
 
 -- MCMC
 
-type K m t (s :: Row *) = U m (Rec t) -> Rec t -> m (Rec t)
+type K m t (s :: Row Type) = U m (Rec t) -> Rec t -> m (Rec t)
 
 mh
   :: forall s t m a
