@@ -4,7 +4,7 @@ github:              "probcomp/haskell-trace-types"
 license:             MIT
 author:              "Alex Lew"
 maintainer:          "alexlew@mit.edu"
-copyright:           "2019 Alex Lew"
+copyright:           "2019-2025 Alex Lew"
 
 extra-source-files:
 - README.md
@@ -26,7 +26,7 @@ dependencies:
 - deepseq
 - random
 - containers
-- monad-bayes 
+- monad-bayes
 - log-domain
 - finite-typelits
 - data-default
@@ -44,5 +44,5 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - trace-types
+    - haskell-trace-types
 

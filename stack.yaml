@@ -17,7 +17,7 @@
 #
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
-resolver: lts-9.0
+resolver: lts-23.27
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -41,11 +41,8 @@ packages:
 #
 # extra-deps: []
 extra-deps:
-- github: adscib/monad-bayes
-  commit: f55d9fa9d24d169d53bb03598306ee8c46b5fc11
-- row-types-0.3.0.0@sha256:a2d26ef268d38e76b82504e564ba771c0d03793e5452d05660e60803ae45d086,3283
-- generic-lens-1.2.0.1@sha256:faecffd513340cd570866aa8f3e0e139d3f9240ecd3eb766357cdf47f550004c,6550
-- unconstrained-0.1.0.2@sha256:e3be5ea44350c5ce9d5f54d0f42c9b5b0639eb0343e9bf7802fb579788a2507c,645
+- monad-bayes-1.3.0.4@sha256:101a60697c2bf0fae60157284bb8127e6a84e37c82c562cd7a262b50a34f3b5d,6650
+- brick-2.5@sha256:f80444d8009883013a2dac934618d86c104f4d68c44171c7aab519418d28aa77,17632
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

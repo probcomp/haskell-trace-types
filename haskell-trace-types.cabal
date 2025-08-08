@@ -1,20 +1,18 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.2.
+-- This file has been generated from package.yaml by hpack version 0.38.0.
 --
 -- see: https://github.com/sol/hpack
---
--- hash: 673a08b8cd5a2cf3bd909493ef897f91a9f716b904300f884748452a463c34d7
 
-name:           trace-types
+name:           haskell-trace-types
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/trace-types#readme>
-homepage:       https://github.com/githubuser/trace-types#readme
-bug-reports:    https://github.com/githubuser/trace-types/issues
-author:         Author name here
-maintainer:     example@example.com
-copyright:      2019 Author name here
-license:        BSD3
+description:    Please see the README on GitHub at <https://github.com/probcomp/haskell-trace-types#readme>
+homepage:       https://github.com/probcomp/haskell-trace-types#readme
+bug-reports:    https://github.com/probcomp/haskell-trace-types/issues
+author:         Alex Lew
+maintainer:     alexlew@mit.edu
+copyright:      2019-2025 Alex Lew
+license:        MIT
 license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
@@ -22,14 +20,14 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/trace-types
+  location: https://github.com/probcomp/haskell-trace-types
 
 library
   exposed-modules:
       BasicExamples
       TraceTypes
   other-modules:
-      Paths_trace_types
+      Paths_haskell_trace_types
   hs-source-dirs:
       src
   build-depends:
@@ -54,7 +52,7 @@ library
 executable trace-types-exe
   main-is: Main.hs
   other-modules:
-      Paths_trace_types
+      Paths_haskell_trace_types
   hs-source-dirs:
       app
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
@@ -66,15 +64,14 @@ executable trace-types-exe
     , deepseq
     , finite-typelits
     , hashable
+    , haskell-trace-types
     , log-domain
     , monad-bayes
     , random
     , row-types
     , statistics
     , text
-    , trace-types
     , unconstrained
     , unordered-containers
     , vector-sized
   default-language: Haskell2010
-
